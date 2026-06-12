@@ -54,12 +54,17 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ===================== TOKENIZERS =====================
 class CharTokenizer:
-    """Mirror of V1's character-level vocab, rebuilt from the training corpus."""
+    """Mirror of V1's character-level vocab, rebuilt from a vocab.json file
+    (sorted list of unique characters) or a training corpus."""
 
-    def __init__(self, corpus_path: str):
-        with open(corpus_path, "r", encoding="utf-8") as f:
-            text = f.read()
-        chars = sorted(list(set(text)))
+    def __init__(self, path: str):
+        if path.endswith(".json"):
+            with open(path, "r", encoding="utf-8") as f:
+                chars = json.load(f)
+        else:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+            chars = sorted(list(set(text)))
         self.stoi = {ch: i for i, ch in enumerate(chars)}
         self.itos = {i: ch for i, ch in enumerate(chars)}
 
@@ -127,7 +132,7 @@ SPECS: dict[str, ModelSpec] = {
         id="v1", name="KarimGPT 1", params="13M",
         description="Character-level · writes Shakespeare",
         dir=V1_DIR, weights_file="model.pt",
-        tokenizer_kind="char", tokenizer_file="shakespear.txt",
+        tokenizer_kind="char", tokenizer_file="vocab.json",
         block_size=256, n_embd=384, n_head=6, n_layer=6,
         bias=True, activation="relu", weight_tying=False, flash=False,
         prompt_style="completion", stop_tokens=[],
