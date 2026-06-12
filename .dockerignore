@@ -1,0 +1,10 @@
+.claude
+__pycache__
+*.pyc
+.git
+.gitignore
+
+# Ignore huge training datasets and checkpoints
+data.pt
+checkpoint_.pt
+input.txt

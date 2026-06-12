@@ -1,0 +1,13 @@
+# Ignore huge training datasets and checkpoints
+data.pt
+checkpoint_.pt
+input.txt
+
+# Python
+__pycache__
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+.claude/

@@ -1,0 +1,39 @@
+"""
+Step 1: Download and format ALL UltraChat conversations.
+200k conversations → ~250-350MB of text → ~200M+ BPE tokens
+"""
+
+from datasets import load_dataset
+import os
+
+# --- CONFIG ---
+NUM_CONVERSATIONS = 200_000
+OUTPUT_FILE = "input.txt"
+# ---------------
+
+print(f"Loading UltraChat dataset (first {NUM_CONVERSATIONS} conversations)...")
+ds = load_dataset(
+    "HuggingFaceH4/ultrachat_200k",
+    split=f"train_sft[:{NUM_CONVERSATIONS}]"
+)
+
+print("Formatting conversations...")
+with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    for i, example in enumerate(ds):
+        messages = example["messages"]
+        for msg in messages:
+            role = msg["role"]
+            content = msg["content"].strip()
+            if role == "user":
+                f.write(f"<|user|>\n{content}\n")
+            elif role == "assistant":
+                f.write(f"<|assistant|>\n{content}\n")
+        f.write("<|end|>\n\n")
+
+        if (i + 1) % 10_000 == 0:
+            print(f"  Formatted {i+1}/{NUM_CONVERSATIONS} conversations...")
+
+print(f"Done! Saved to '{OUTPUT_FILE}'")
+
+size_mb = os.path.getsize(OUTPUT_FILE) / (1024 * 1024)
+print(f"File size: {size_mb:.1f} MB")
